@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo</title>
+    <style>
+        @import url('https://meyerweb.com/eric/tools/css/reset/reset.css');
+
+        :root {
+            --primary-color: #1D1825;
+            --secondary-color: #15101C;
+            --danger-color: #e74C3C;
+            --right-color: #78CFB0;
+            --text-color-primary: #9E78CF;
+            --text-color-secondary: #FFFFFF;
+            --bg-color: #0D0714;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            min-height: 600px;
+            border-radius: 20px;
+            padding: 30px;
+            background-color: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .tasks-add {
+            display: flex;
+            gap: 16px;
+        }
+
+        .input-task {
+            flex-grow: 1;
+        }
+
+        input, select {
+            width: 100%;
+            height: 38px;
+            border-radius: 10px;
+            padding: 0 12px;
+            border: var(--text-color-primary) solid 1px;
+            background-color: transparent;
+            color: var(--text-color-secondary);
+            font-size: 14px;
+        }
+
+        input::placeholder {
+            color: var(--text-color-primary);
+            opacity: 0.7;
+        }
+
+        button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--text-color-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .tasks-search-filter {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .tasks-search {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .input-task-search {
+            flex: 1;
+        }
+
+        .tasks-filter-select {
+            width: 180px;
+        }
+
+        .task-lists-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            min-height: 0;
+        }
+
+        .general-task-list, .general-task-list-done {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .text-task-list {
+            color: var(--text-color-secondary);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .tasks-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 300px;
+            padding-right: 10px;
+        }
+
+        .task-view {
+            width: 100%;
+            min-height: 70px;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;    
+            background-color: var(--secondary-color);
+            gap: 16px;
+        }
+
+        .content-task {
+            color: var(--text-color-primary);
+            word-break: break-word;
+            flex: 1;
+        }
+
+        .task-view .icons {
+            display: flex;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        .task-view .icons img {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .task-view .icons img:hover {
+            transform: scale(1.1);
+        }
+
+        /* Custom scrollbar */
+        .tasks-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .tasks-wrapper::-webkit-scrollbar-track {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .tasks-wrapper::-webkit-scrollbar-thumb {
+            background: var(--text-color-primary);
+            border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .tasks-search-filter {
+                flex-direction: column;
+            }
+
+            .tasks-filter-select {
+                width: 100%;
+            }
+
+            .task-view {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px;
+            }
+
+            .task-view .icons {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>  
+    <div class="container">
+        <form class="tasks-add" id="addTaskForm">
+            <div class="input-task">
+                <input type="text" name="todo-input" placeholder="Add a new task" required>
+            </div>
+            <button type="submit">
+                <img src="imgs/incon-check.svg" alt="Submit Icon">
+            </button>
+        </form>
+
+        <div class="tasks-search-filter">
+            <form class="tasks-search" id="searchForm">
+                <div class="input-task-search">
+                    <input type="text" name="search-input" placeholder="Search...">
+                </div>
+                <button type="submit">
+                    <img src="imgs/icon-remove.svg" alt="Search Icon">
+                </button>
+            </form>
+            <div class="tasks-filter-select">
+                <select id="filter-select">
+                    <option value="all">All Tasks</option>
+                    <option value="done">Completed</option>
+                    <option value="todo">To Do</option>   
+                </select>
+            </div>
+        </div>
+
+        <div class="task-lists-container">
+            <div class="general-task-list">
+                <p class="text-task-list">Tasks to do - <span id="todoCount">0</span></p>
+                <div class="tasks-wrapper" id="todoTasks">
+                    <!-- Todo tasks will be inserted here -->
+                </div>
+            </div>
+
+            <div class="general-task-list-done">
+                <p class="text-task-list">Completed - <span id="doneCount">0</span></p>
+                <div class="tasks-wrapper" id="doneTasks">
+                    <!-- Completed tasks will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TodoApp {
+            constructor() {
+                this.tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                this.setupEventListeners();
+                this.render();
+            }
+
+            setupEventListeners() {
+                // Add task form
+                document.getElementById('addTaskForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const input = e.target.querySelector('input');
+                    if (input.value.trim()) {
+                        this.addTask(input.value.trim());
+                        input.value = '';
+                    }
+                });
+
+                // Search form
+                document.getElementById('searchForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const searchInput = e.target.querySelector('input');
+                    this.searchTasks(searchInput.value.trim());
+                });
+
+                // Filter select
+                document.getElementById('filter-select').addEventListener('change', (e) => {
+                    this.filterTasks(e.target.value);
+                });
+            }
+
+            addTask(content) {
+                const task = {
+                    id: Date.now(),
+                    content,
+                    completed: false,   
+                    createdAt: new Date().toISOString()
+                };
+                this.tasks.unshift(task);
+                this.saveTasks();
+                this.render();
+            }
+
+            toggleTask(id) {
+                const task = this.tasks.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.saveTasks();
+                    this.render();
+                }
+            }
+
+            deleteTask(id) {
+                this.tasks = this.tasks.filter(t => t.id !== id);
+                this.saveTasks();
+                this.render();
+            }
+
+            searchTasks(query) {
+                if (!query) {
+                    this.render();
+                    return;
+                }
+
+                const filtered = this.tasks.filter(task => 
+                    task.content.toLowerCase().includes(query.toLowerCase())
+                );
+                this.renderTaskLists(filtered);
+            }
+
+            filterTasks(filter) {
+                let filtered = [...this.tasks];
+                if (filter === 'done') {
+                    filtered = this.tasks.filter(task => task.completed);
+                } else if (filter === 'todo') {
+                    filtered = this.tasks.filter(task => !task.completed);
+                }
+                this.renderTaskLists(filtered);
+            }
+
+            createTaskElement(task) {
+                const div = document.createElement('div');
+                div.className = 'task-view';
+                div.innerHTML = `
+                    <p class="content-task">${task.content}</p>
+                    <div class="icons">
+                        <img src="imgs/incon-check.svg" alt="Complete task" 
+                            style="filter: ${task.completed ? 'brightness(0.5)' : 'none'}"
+                            onclick="todoApp.toggleTask(${task.id})">
+                        <img src="imgs/icon-lixo.svg" alt="Delete task" 
+                            onclick="todoApp.deleteTask(${task.id})">
+                    </div>
+                `;
+                return div;
+            }
+
+            renderTaskLists(tasksToRender = this.tasks) {
+                const todoTasks = tasksToRender.filter(task => !task.completed);
+                const doneTasks = tasksToRender.filter(task => task.completed);
+
+                const todoContainer = document.getElementById('todoTasks');
+                const doneContainer = document.getElementById('doneTasks');
+
+                todoContainer.innerHTML = '';
+                doneContainer.innerHTML = '';
+
+                todoTasks.forEach(task => {
+                    todoContainer.appendChild(this.createTaskElement(task));
+                });
+
+                doneTasks.forEach(task => {
+                    doneContainer.appendChild(this.createTaskElement(task));
+                });
+
+                document.getElementById('todoCount').textContent = todoTasks.length;
+                document.getElementById('doneCount').textContent = doneTasks.length;
+            }
+
+            render() {
+                this.renderTaskLists();
+            }
+
+            saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(this.tasks));
+            }
+        }
+
+        const todoApp = new TodoApp();
+    </script>
+</body>
+</html>
