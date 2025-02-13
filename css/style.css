@@ -173,3 +173,7 @@ select{
     padding: 5px;
 }
 
+
+.general-task-list-done .content-task{
+    color: var(--right-color);
+}
